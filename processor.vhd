@@ -32,6 +32,7 @@ architecture proc of processor is
 	signal opcode : std_logic_vector(2 downto 0);
 	signal fex : fexstates;
 	signal state : states;
+	signal interrupt :std_logic;
 	
 	
 	
@@ -53,196 +54,198 @@ architecture proc of processor is
 				fex <= fetch;
 				state <= s0;
 			elsif rising_edge(clk) then
-			
-				case fex is
-					when fetch =>
-						ir <= idata;
-						fex <= execute;
-					when execute =>
-						case opcode is
-							when "000" => --add
-								case state is
-									when s0 =>
-										rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
-										rc <= reg(conv_integer(unsigned(ir(2 downto 0))));
-										state <= s1;
-									when s1 =>
-										-- intrb := to_integer(signed(rb));
-										-- intrc := to_integer(signed(rc));
-										-- intrb := intrb + intrc;
-										-- ra <= std_logic_vector(to_signed(intrb, 16));
-										ra <= signed(rb) + signed(rc);
-										state <= s2;
-									when s2 =>
-										reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
-										pc <= unsigned(pc) + 1;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
-								
-							when "001" => --addi
-								case state is
-									when s0 =>
-										rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
-										rc(15 downto 6) <= (others => ir(6));
-										rc(5 downto 0) <= ir(5 downto 0);
-										state <= s1;
-									when s1 =>
-										-- intrb := to_integer(signed(rb));
-										-- intrc := to_integer(signed(rc));
-										-- intrb := intrb + intrc;
-										-- ra <= std_logic_vector(to_signed(intrb, 16));
-										ra <= signed(rb) + signed(rc);
-										state <= s2;
-									when s2 =>
-										reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
-										pc <= unsigned(pc) + 1;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
-								
-							when "010" => --nand
-								case state is
-									when s0 =>
-										rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
-										rc <= reg(conv_integer(unsigned(ir(2 downto 0))));
-										state <= s1;
-									when s1 =>
-										ra <= rb nand rc;
-										state <= s2;
-									when s2 =>
-										reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
-										pc <= unsigned(pc) + 1;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
-								
-							when "011" => --lui
-								case state is
-									when s0 =>
-										ra(15 downto 6) <= ir(9 downto 0);
-										ra(5 downto 0) <= (others => '0');
-										state <= s1;
-									when s1 =>
-										reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
-										pc <= unsigned(pc) + 1;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
-							
-							when "100" => --sw
-								case state is
-									when s0 =>
-										rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
-										ra <= reg(conv_integer(unsigned(ir(12 downto 10))));
-										rc(15 downto 6) <= (others => ir(6));
-										rc(5 downto 0) <= ir(5 downto 0);
-										state <= s1;
-									when s1 =>
-										-- intrb := to_integer(signed(rb));
-										-- intrc := to_integer(signed(rc));
-										-- intrb := intrb + intrc;
-										-- rc <= std_logic_vector(to_signed(intrb, 16));
-										rc <= signed(rb) + signed(rc);
-										state <= s2;
-									when s2 =>
-										dwen <= '1';
-										daddr <= rc;
-										dout <= ra;
-										state <= s3;
-									when s3 =>
-										dwen <= '0';
-										pc <= unsigned(pc) + 1;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
-								
-							when "101" => --lw
-								case state is
-									when s0 =>
-										rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
-										rc(15 downto 6) <= (others => ir(6));
-										rc(5 downto 0) <= ir(5 downto 0);
-										state <= s1;
-									when s1 =>
-										-- intrb := to_integer(signed(rb));
-										-- intrc := to_integer(signed(rc));
-										-- intrb := intrb + intrc;
-										-- ra <= std_logic_vector(to_signed(intrb, 16));
-										rc <= signed(rb) + signed(rc);
-										state <= s2;
-									when s2 =>
-										daddr <= rc;
-										state <= s3;
-									when s3 =>
-										reg(conv_integer(unsigned(ir(12 downto 10)))) <= din;
-										pc <= unsigned(pc) + 1;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
-								
-							when "110" => --bne
-								case state is
-									when s0 =>
-										rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
-										ra <= reg(conv_integer(unsigned(ir(12 downto 10))));
-										rc(15 downto 6) <= (others => ir(6));
-										rc(5 downto 0) <= ir(5 downto 0);
-										state <= s1;
-									when s1 =>
-										if ra = rb then
+				if interrupt='0' then
+					case fex is
+						when fetch =>
+							ir <= idata;
+							fex <= execute;
+						when execute =>
+							case opcode is
+								when "000" => --add
+									case state is
+										when s0 =>
+											rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+											rc <= reg(conv_integer(unsigned(ir(2 downto 0))));
+											state <= s1;
+										when s1 =>
+											-- intrb := to_integer(signed(rb));
+											-- intrc := to_integer(signed(rc));
+											-- intrb := intrb + intrc;
+											-- ra <= std_logic_vector(to_signed(intrb, 16));
+											ra <= signed(rb) + signed(rc);
+											state <= s2;
+										when s2 =>
+											reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
 											pc <= unsigned(pc) + 1;
-										else
-											pc <= unsigned(pc) + unsigned(rc);
-										end if;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
+									
+								when "001" => --addi
+									case state is
+										when s0 =>
+											rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+											rc(15 downto 6) <= (others => ir(6));
+											rc(5 downto 0) <= ir(5 downto 0);
+											state <= s1;
+										when s1 =>
+											-- intrb := to_integer(signed(rb));
+											-- intrc := to_integer(signed(rc));
+											-- intrb := intrb + intrc;
+											-- ra <= std_logic_vector(to_signed(intrb, 16));
+											ra <= signed(rb) + signed(rc);
+											state <= s2;
+										when s2 =>
+											reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
+											pc <= unsigned(pc) + 1;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
+									
+								when "010" => --nand
+									case state is
+										when s0 =>
+											rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+											rc <= reg(conv_integer(unsigned(ir(2 downto 0))));
+											state <= s1;
+										when s1 =>
+											ra <= rb nand rc;
+											state <= s2;
+										when s2 =>
+											reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
+											pc <= unsigned(pc) + 1;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
+									
+								when "011" => --lui
+									case state is
+										when s0 =>
+											ra(15 downto 6) <= ir(9 downto 0);
+											ra(5 downto 0) <= (others => '0');
+											state <= s1;
+										when s1 =>
+											reg(conv_integer(unsigned(ir(12 downto 10)))) <= ra;
+											pc <= unsigned(pc) + 1;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
 								
-							when "111" => --jalr
-								case state is
-									when s0 =>
-										rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
-										state <= s1;
-									when s1 =>
-										reg(conv_integer(unsigned(ir(12 downto 10)))) <= unsigned(pc) + 1;
-										pc <= rb;
-										state <= s0;
-										fex <= fetch;
-									when others =>
-										fex <= fetch;
-										state <= s0;
-								end case;
-							when others =>
-								fex <= fetch;
-								state <= s0;
-						end case;
-					when others =>
-						fex <= fetch;
-						state <= s0;
-				end case;
-				reg(0)<= (others =>'0');
+								when "100" => --sw
+									case state is
+										when s0 =>
+											rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+											ra <= reg(conv_integer(unsigned(ir(12 downto 10))));
+											rc(15 downto 6) <= (others => ir(6));
+											rc(5 downto 0) <= ir(5 downto 0);
+											state <= s1;
+										when s1 =>
+											-- intrb := to_integer(signed(rb));
+											-- intrc := to_integer(signed(rc));
+											-- intrb := intrb + intrc;
+											-- rc <= std_logic_vector(to_signed(intrb, 16));
+											rc <= signed(rb) + signed(rc);
+											state <= s2;
+										when s2 =>
+											dwen <= '1';
+											daddr <= rc;
+											dout <= ra;
+											state <= s3;
+										when s3 =>
+											dwen <= '0';
+											pc <= unsigned(pc) + 1;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
+									
+								when "101" => --lw
+									case state is
+										when s0 =>
+											rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+											rc(15 downto 6) <= (others => ir(6));
+											rc(5 downto 0) <= ir(5 downto 0);
+											state <= s1;
+										when s1 =>
+											-- intrb := to_integer(signed(rb));
+											-- intrc := to_integer(signed(rc));
+											-- intrb := intrb + intrc;
+											-- ra <= std_logic_vector(to_signed(intrb, 16));
+											rc <= signed(rb) + signed(rc);
+											state <= s2;
+										when s2 =>
+											daddr <= rc;
+											state <= s3;
+										when s3 =>
+											reg(conv_integer(unsigned(ir(12 downto 10)))) <= din;
+											pc <= unsigned(pc) + 1;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
+									
+								when "110" => --bne
+									case state is
+										when s0 =>
+											rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+											ra <= reg(conv_integer(unsigned(ir(12 downto 10))));
+											rc(15 downto 6) <= (others => ir(6));
+											rc(5 downto 0) <= ir(5 downto 0);
+											state <= s1;
+										when s1 =>
+											if ra = rb then
+												pc <= unsigned(pc) + 1;
+											else
+												pc <= unsigned(pc) + unsigned(rc);
+											end if;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
+									
+								when "111" => --jalr
+									case state is
+										when s0 =>
+											rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+											state <= s1;
+										when s1 =>
+											reg(conv_integer(unsigned(ir(12 downto 10)))) <= unsigned(pc) + 1;
+											pc <= rb;
+											state <= s0;
+											fex <= fetch;
+										when others =>
+											fex <= fetch;
+											state <= s0;
+									end case;
+								when others =>
+									fex <= fetch;
+									state <= s0;
+							end case;
+						when others =>
+							fex <= fetch;
+							state <= s0;
+					end case;
+					reg(0)<= (others =>'0');
+				else
+				-- write to interrupt buffer
 			end if;
 		end process;
 end proc;
