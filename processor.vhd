@@ -246,6 +246,7 @@ architecture proc of processor is
 					reg(0)<= (others =>'0');
 				else
 				-- write to interrupt buffer
+				end if;
 			end if;
 		end process;
 end proc;
