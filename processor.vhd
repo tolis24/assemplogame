@@ -56,7 +56,7 @@ begin
 			-- Reset Instuction Register
 				ir <= (others => '0');
 				
-				cycle <= fetch;
+				cycle <= dummy;
 				
 			elsif rising_edge(clk) then
 			
