@@ -1,8 +1,9 @@
 library ieee;
 use ieee.std_logic_1164.all;
--- use IEEE.std_logic_arith.all;
-use IEEE.numeric_std.all;
-use IEEE.std_logic_unsigned.all;
+use IEEE.std_logic_arith.all;
+--use IEEE.numeric_std.all;
+--use IEEE.std_logic_unsigned.all;
+
 entity processor is
 
 port (	clk 	: in std_logic;								-- clock
@@ -83,19 +84,18 @@ begin
 							
 					-- jalr
 					-- PC + 1
-						elsif ir(15 downto 13) = "111" then --
-							ra <= pc + 1;
-						
+						elsif ir(15 downto 13) = "111" then
+							ra <= unsigned(pc) + 1;
+							
 					-- add
 					-- addi
 					-- nand
+					-- bne
 					-- sw
 					-- lw
-					-- lw
-					-- bne
 					-- R[regB] <= RegFile(IR(9:7))
 						else
-							ra <= reg(conv_integer(ir(9 downto 7)));
+							ra <= reg(conv_integer(unsigned(ir(9 downto 7))));
 						end if;
 						
 					-- end ra
@@ -106,21 +106,26 @@ begin
 					-- nand
 					-- R[regC]
 						if ir(15 downto 13) = "000" or ir(15 downto 13) = "010" then
-							rb <= reg(conv_integer(ir(2 downto 0))); -- load B from RF's address regC
+							rb <= reg(conv_integer(unsigned(ir(2 downto 0)))); -- load B from RF's address regC
 							
 					-- addi
 					-- sw
 					-- lw
-					-- bne
 					-- immed
 						elsif ir(15 downto 13) = "001" or ir(15 downto 13) = "100" or ir(15 downto 13) = "101" then
 						-- sign extension
 							rb(15 downto 6) <= (others => ir(6)); -- top bits
 										
 							rb(5 downto 0) <= ir(5 downto 0); -- bottom bits
-						elsif ir(15 downto 13) = "110" then	
-							rb <= reg(conv_integer(ir(12 downto 10)));
-				      end if;
+							
+					-- bne
+						elsif ir(15 downto 13) = "110" then
+							rb <= reg(conv_integer(unsigned(ir(12 downto 10))));
+						
+					-- jalr
+						elsif ir(15 downto 13) = "111" then
+							rb <= reg(conv_integer(unsigned(ir(9 downto 7))));
+						end if;
 					
 					-- end rb
 						
@@ -133,14 +138,17 @@ begin
 						-- addi : R[regB] + immed
 						-- sw,lw: R[regB] + immed
 						if ir(15 downto 13) = "000" OR ir(15 downto 13) = "001" OR ir(15 downto 13) = "100" OR ir(15 downto 13) = "101" then
-							ALUOut <= ra + rb;
+							ALUOut <= unsigned(ra) + unsigned(rb);
 							
 						-- nand : ¬(R[regB] + R[regC])
 						elsif ir(15 downto 13) = "010" then
 							ALUOut <= NOT (ra AND rb);
+						
 						-- lui  : ALUOut <= immed & 0xffc0
-						elsif ir(15 downto 13) = "011" then
+						-- jalr
+						elsif ir(15 downto 13) = "011" or ir(15 downto 13) = "111" then
 							ALUOut <= ra;
+						-- bne
 						elsif ir(15 downto 13) = "110" then 
 							ALUOut(15 downto 6) <= (others => ir(6)); -- top bits
 										
@@ -151,6 +159,8 @@ begin
 --						if ir(15 downto 13) = "100" then 
 --							dwen <= '1';
 --						end if;
+						
+						--lw
 						if ir(15 downto 13) = "101" then
 							cycle <= read_mem;
 						else
@@ -167,41 +177,46 @@ begin
 						-- sw : R[regA] => RegFile(R[regB] + immed) 
 						if ir(15 downto 13) = "100" then	
 							daddr <= ALUOut;
-							dout 	<= reg(conv_integer(ir(12 downto 10)));
+							dout 	<= reg(conv_integer(unsigned(ir(12 downto 10))));
 							dwen 	<= '1'; -- write in the same cycle
+							
 						-- lw : R[regA] <= RegFile(R[regB] + immed) 
 						elsif ir(15 downto 13) = "101" then
-							reg(conv_integer(ir(12 downto 10))) <= din;
-						elsif ir(15 downto 13) = "110" then-- bne
+							reg(conv_integer(unsigned(ir(12 downto 10)))) <= din;
+						
+						-- add, addi, nand, lui, jalr: R[regA] <= ALUOut
 						else
-						-- add, addi, nand, lui, jalr : R[regA] <= ALUOut
-							reg(conv_integer(ir(12 downto 10))) <= ALUOut;
+							reg(conv_integer(unsigned(ir(12 downto 10)))) <= ALUOut;
 						end if;
 						
 						cycle <= final;
 						
 					when final =>
 					
+						--sw
 						if ir(15 downto 13) = "100" then 
 							dwen <= '0';
 						end if;
-					
+						--bne
 						if ir(15 downto 13) = "110" then 
-							if (conv_integer(ra) /= conv_integer(rb)) then
-							-- PC <= PC + immed + 1
-								pc <= pc + ALUOut + 1;
+							if (ra = rb) then
+								pc <= unsigned(pc) + 1;
+							else
+								-- PC <= PC + immed + 1
+								pc <= unsigned(pc) + unsigned(ALUOut) + 1;
 							end if;
+						--jalr
 						elsif ir(15 downto 13) = "111" then
 							pc <= rb;
 						else
-							pc <= pc + 1;
+							pc <= unsigned(pc) + 1;
 						end if;
 						
 						cycle <= dummy;
 						
 					when others =>
 					
-						pc <= pc + 1;
+						pc <= unsigned(pc) + 1;
 						
 						cycle <= dummy;
 						
