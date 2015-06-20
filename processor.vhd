@@ -7,30 +7,35 @@ use IEEE.std_logic_arith.all;
 entity processor is
 
 port (	clk 	: in std_logic;								-- clock
-			rst 	: in std_logic;								-- reset
+		rst 	: in std_logic;								-- reset
 			
-			iaddr : out std_logic_vector(15 downto 0);	-- instruction address to fetch
-			idata : in std_logic_vector(15 downto 0);		-- instruction data for ir
+		iaddr : out std_logic_vector(15 downto 0);	-- instruction address to fetch
+		idata : in std_logic_vector(15 downto 0);		-- instruction data for ir
 			
-			daddr : out std_logic_vector(15 downto 0);	-- data address in memory
-			dwen 	: out std_logic;								-- Data Mem Write Enable
-			dout 	: out std_logic_vector(15 downto 0);	-- data write
-			din 	: in std_logic_vector(15 downto 0)		-- data read
-		);
+		daddr : out std_logic_vector(15 downto 0);	-- data address in memory
+		dwen 	: out std_logic;								-- Data Mem Write Enable
+		dout 	: out std_logic_vector(15 downto 0);	-- data write
+		din 	: in std_logic_vector(15 downto 0);		-- data read
+			
+		intVector 	: in std_logic_vector(4 downto 0);	-- 0 up, 1 down, 2 left, 3 right, 4 select
+		wintflag	: in std_logic;						-- enable to write at interrupt flag
+		intEn		: in std_logic						--value to write at interrupt flag				
+	);
 		
 end processor;
 
 architecture proc of processor is
 
 	type registerFile is array(7 downto 0) of std_logic_vector(15 downto 0);
-	type cycles is (dummy, fetch, reg_read, execute, result, final, read_mem); -- memory_write);
+	type cycles is (interrupt, dummy, fetch, reg_read, execute, result, final, read_mem); -- memory_write);
 
-	signal pc 				: std_logic_vector(15 downto 0); -- program counter
+	signal pc 				: std_logic_vector(15 downto 0);	-- program counter
 	signal reg 				: registerFile;						-- array of registers
-	signal ir 				: std_logic_vector(15 downto 0); -- instruction register
-	signal ra, rb, ALUOut: std_logic_vector(15 downto 0); -- registers a, b, ALUOut
-	signal opcode 			: std_logic_vector(2 downto 0);	-- operation code
-	signal cycle 			: cycles;	   						-- cycles
+	signal ir 				: std_logic_vector(15 downto 0);	-- instruction register
+	signal ra, rb, ALUOut: std_logic_vector(15 downto 0);		-- registers a, b, ALUOut
+	signal opcode 			: std_logic_vector(2 downto 0);		-- operation code
+	signal cycle 			: cycles;							-- cycles
+	signal intflag			: std_logic;						-- Interrupt flag
 --	signal counter       : std_logic_vector(27 downto 0);
 	
 begin
@@ -51,6 +56,9 @@ begin
 					reg(i) <= (others => '0');
 				end loop;
 				
+			-- Reset interrupt flag
+				intflag <= '0';
+				
 			-- Reset Program Counter
 				pc <= (others => '0');
 				
@@ -61,9 +69,40 @@ begin
 				
 			elsif rising_edge(clk) then
 			
+				if wintflag ='1' then 
+					intflag <= intEn ;
+				end if;
+			
 				case cycle is 
+					when interrupt =>
+					
+						cycle <= fetch;
+						
+						if intflag = '0' then
+						
+							if intVector(0) = '1' then 
+								pc <= (others => '0'); --address (of InsMem) of up interrupt Handler  (fix)
+							elsif intVector(1) ='1' then
+								pc <= (others => '0'); --address (of InsMem) of down interrupt Handler (fix)
+							elsif intVector(2) ='1' then
+								pc <= (others => '0'); --address (of InsMem) of left interrupt Handler (fix)
+							elsif intVector(3) ='1' then
+								pc <= (others => '0'); --address (of InsMem) of right interrupt Handler (fix)
+							elsif intVector(4) ='1' then
+								pc <= (others => '0'); --address (of InsMem) of select interrupt Handler (fix)
+							end if;
+							
+							if (intVector /= "00000") then 
+								daddr <= (others =>'0'); -- address (of DatMem) to store the normal flow (fix)
+								dwen <= '1';
+								intflag <= '1';
+								cycle <= dummy;
+							end if;
+						end if;
+						
 					when dummy =>
 						cycle <= fetch;
+						dwen <='0'; -- When an interrupt happens must reset dwen of writing the normal flow pc to DataMem 
 					when fetch =>
 					
 						ir <= idata;
@@ -212,17 +251,19 @@ begin
 							pc <= unsigned(pc) + 1;
 						end if;
 						
-						cycle <= dummy;
+						cycle <= interrupt;
 						
 					when others =>
 					
 						pc <= unsigned(pc) + 1;
 						
-						cycle <= dummy;
+						cycle <= interrupt;
 						
 					end case;
 			-- set RegFile(0) to 0
 				reg(0)<= (others =>'0');	
+				
+			
 			end if;
 	end process;
 end proc;

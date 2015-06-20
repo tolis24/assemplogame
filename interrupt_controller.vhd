@@ -1,10 +1,14 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use IEEE.std_logic_arith.all;
+
 entity interrupt_controller is
 
 port (		clk 	: in std_logic;			-- clock
 			rst 	: in std_logic;			-- reset
 			
-			wint	: in std_logic;						-- write interrupt enable
-			intEnable:in std_logic;						-- interrupt enable
+			--wint	: in std_logic;						-- write interrupt enable
+			--intEnable:in std_logic;						-- interrupt enable
 			rstVector :in std_logic_vector(4 downto 0); -- Vector to rst interrupts
 			
 			up		:	in std_logic;		-- button inputs
@@ -13,7 +17,7 @@ port (		clk 	: in std_logic;			-- clock
 			rght	:	in std_logic;
 			slct	:	in std_logic;
 			
-			intVector : out std_logic_vector(4 downto 0);	-- 0 up, 1 down, 2 left, 3 right, 4 select
+			intVector : out std_logic_vector(4 downto 0)	-- 0 up, 1 down, 2 left, 3 right, 4 select
 		);
 		
 end interrupt_controller;
@@ -26,7 +30,7 @@ architecture sync of interrupt_controller is
 	signal rghtSync : std_logic_vector(3 downto 0);
 	signal slctSync : std_logic_vector(3 downto 0);
 
-	signal inten	: std_logic;
+	--signal inten	: std_logic;
 	
 begin
 	upSync(0)   <= up;
@@ -53,13 +57,13 @@ begin
 			
 			intVector <= (others => '0');
 			
-			inten <= '0';
+			--inten <= '0';
 		
 		elsif rising_edge(clk) then
 		
-			if wint ='1' then 
-				inten <= intEnable;
-			end if;
+			-- if wint ='1' then 
+			-- 	inten <= intEnable;
+			-- end if;
 			
 			upSync(1)   <= upSync(0);		--Sync(1) <= Sync(0)
 			downSync(1) <= downSync(0);
@@ -76,30 +80,32 @@ begin
 			lftSync(3)  <= lftSync(2);
 			rghtSync(3) <= rghtSync(2);
 			
-			if inten ='1' then 				-- if Enable = 1 then set intVector at falling edge
+			--if inten ='1' then 				-- if Enable = 1 then set intVector at falling edge
 				
-				if upSync(2) = '1' and upSync(3) ='0' and rstVector(0) = '0' then	
-					intVector(0) <= '1';
-				end if;
 				
-				if downSync(2) = '1' and downSync(3) ='0' and rstVector(1) = '0' then	
-					intVector(1) <= '1';
-				end if;
-				
-				if lftSync(2) = '1' and lftSync(3) ='0' and rstVector(2) = '0' then	
-					intVector(2) <= '1';
-				end if;
-				
-				if rghtSync(2) = '1' and rghtSync(3) ='0' and rstVector(3) = '0' then	
-					intVector(3) <= '1';
-				end if;
-				
-				if slctSync(2) = '1' and slctSync(3) ='0' and rstVector(4) = '0' then	
-					intVector(4) <= '1';
-				end if;
-				
+			-- Setting interrupts
+			if upSync(2) = '1' and upSync(3) ='0' and rstVector(0) = '0' then	
+				intVector(0) <= '1';
 			end if;
 			
+			if downSync(2) = '1' and downSync(3) ='0' and rstVector(1) = '0' then	
+				intVector(1) <= '1';
+			end if;
+			
+			if lftSync(2) = '1' and lftSync(3) ='0' and rstVector(2) = '0' then	
+				intVector(2) <= '1';
+			end if;
+			
+			if rghtSync(2) = '1' and rghtSync(3) ='0' and rstVector(3) = '0' then	
+				intVector(3) <= '1';
+			end if;
+			
+			if slctSync(2) = '1' and slctSync(3) ='0' and rstVector(4) = '0' then	
+				intVector(4) <= '1';
+			end if;
+			
+			
+			--Resetting interrupts
 			if rstVector(0) = '1' then
 				intVector(0) <= '0';
 			end if;
