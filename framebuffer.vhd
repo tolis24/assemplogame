@@ -7,7 +7,11 @@ entity framebuffer is port(
 	  rst           : in  std_logic;
 	  
 	  we            : in  std_logic;
-      dataIn        : in  std_logic_vector(15 downto 0);
+      dataIn        : in  std_logic_vector(15 downto 0);	-- Input data should have the following format
+															-- (15 downto 12) don't care
+															-- (11 downto 8) row number (X)
+															-- (8 downto 4) column number (Y)
+															-- (3 downto 0) value to store (V)
 	  
       countH  : in  std_logic_vector(9 downto 0);
       countV  : in  std_logic_vector(9 downto 0);
@@ -21,58 +25,42 @@ type memory is array(integer range 0 to 7, integer range 0 to 7) of std_logic_ve
 
 signal frame : memory;
 signal row, col : std_logic_vector(2 downto 0);
+signal X,Y,V : std_logic_vector(3 downto 0);
 
 
 begin
 
--- Horizontal
---079 -> 000 100 1111
---159 -> 001 001 1111
---239 -> 001 110 1111
---319 -> 010 011 1111
---399 -> 011 000 1111
---479 -> 011 101 1111
---559 -> 100 010 1111
---639 -> 100 111 1111
+X <= dataIn(11 downto 8);	-- Row
+Y <= dataIn(7 downto 4);	-- Column
+V <= dataIn(3 downto 0);	-- Value
 
---Vertical
---059 -> 0001 110 11
---119 -> 0011 101 11
---179 -> 0101 100 11
---239 -> 0111 011 11
---299 -> 1001 010 11
---359 -> 1011 001 11
---419 -> 1101 000 11
---479 -> 1110 111 11
 
--- As we see from the countH and countV with 3 bits we recognize the row and the column
-
-row <= 	"000" when countV(4 downto 2)= "110" else
-		"001" when countV(4 downto 2)= "101" else
-		"010" when countV(4 downto 2)= "100" else
-		"011" when countV(4 downto 2)= "011" else
-		"100" when countV(4 downto 2)= "010" else
-		"101" when countV(4 downto 2)= "001" else
-		"110" when countV(4 downto 2)= "000" else
-		"111" when countV(4 downto 2)= "111" else
+row <= 	"000" when unsigned(countV) < 60 else
+		"001" when unsigned(countV) < 120 else
+		"010" when unsigned(countV) < 180 else
+		"011" when unsigned(countV) < 240 else
+		"100" when unsigned(countV) < 300 else
+		"101" when unsigned(countV) < 360 else
+		"110" when unsigned(countV) < 420 else
+		"111" when unsigned(countV) < 480 else
 		"000";
 		
-col <= 	"000" when countH(6 downto 4)= "100" else
-		"001" when countH(6 downto 4)= "001" else
-		"010" when countH(6 downto 4)= "110" else
-		"011" when countH(6 downto 4)= "011" else
-		"100" when countH(6 downto 4)= "000" else
-		"101" when countH(6 downto 4)= "101" else
-		"110" when countH(6 downto 4)= "010" else
-		"111" when countH(6 downto 4)= "111" else
+col <= 	"000" when unsigned(countH) < 80 else
+		"001" when unsigned(countH) < 160 else
+		"010" when unsigned(countH) < 240 else
+		"011" when unsigned(countH) < 320 else
+		"100" when unsigned(countH) < 400 else
+		"101" when unsigned(countH) < 480 else
+		"110" when unsigned(countH) < 560 else
+		"111" when unsigned(countH) < 640 else
 		"000";
 
-wrt : process (clk, rst)
+process (clk, rst) --memory behavior
 
 	begin
 		if rising_edge(clk) then
 			if (we = '1') then
-				frame(conv_integer(unsigned(dataIn(11 downto 8))),conv_integer(unsigned(dataIn(7 downto 4)))) <= dataIn(3 downto 0);
+				frame(conv_integer(unsigned(X)),conv_integer(unsigned(Y))) <= V;
 			end if;
 			
 		dataOut <= frame(conv_integer(unsigned(row)),conv_integer(unsigned(col)));
