@@ -59,7 +59,7 @@ process (clk, rst) --memory behavior
 
 	begin
 		if rising_edge(clk) then
-			if (we = '1') then
+			if (we = '1' and unsigned(X) < 8 and unsigned(Y) < 8) then
 				frame(conv_integer(unsigned(X)),conv_integer(unsigned(Y))) <= V;
 			end if;
 			
