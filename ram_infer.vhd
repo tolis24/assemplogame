@@ -17,7 +17,7 @@ entity ram_infer is port(
 end ram_infer;
 
 architecture rtl of ram_infer is
-   type memory is array(0 to 255) of std_logic_vector(15 downto 0);
+   type memory is array(0 to 1023) of std_logic_vector(15 downto 0);
    
 -------------------------------------------------------
 -- memory initialization for simulation in modelsim
