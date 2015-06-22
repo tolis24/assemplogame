@@ -9,7 +9,8 @@ port (		clk 	: in std_logic;			-- clock
 			
 			--wint	: in std_logic;						-- write interrupt enable
 			--intEnable:in std_logic;						-- interrupt enable
-			rstVector :in std_logic_vector(4 downto 0); -- Vector to rst interrupts
+			rstVector	: in std_logic_vector(4 downto 0); -- Vector to rst interrupts
+			Wen			: in std_logic;
 			
 			up		:	in std_logic;		-- button inputs
 			down	:	in std_logic;
@@ -109,23 +110,23 @@ begin
 			
 			
 			--Resetting interrupts
-			if rstVector(0) = '1' then
+			if rstVector(0) = '1' and Wen = '1' then
 				intVector(0) <= '0';
 			end if;
 			
-			if rstVector(1) = '1' then
+			if rstVector(1) = '1' and Wen = '1' then
 				intVector(1) <= '0';
 			end if;
 			
-			if rstVector(2) = '1' then
+			if rstVector(2) = '1' and Wen = '1' then
 				intVector(2) <= '0';
 			end if;
 			
-			if rstVector(3) = '1' then
+			if rstVector(3) = '1' and Wen = '1' then
 				intVector(3) <= '0';
 			end if;
 			
-			if rstVector(4) = '1' then
+			if rstVector(4) = '1' and Wen = '1' then
 				intVector(4) <= '0';
 			end if;
 		
