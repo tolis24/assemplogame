@@ -24,7 +24,7 @@ architecture vga of vga_controller is
 signal Pixelclk : std_logic;
 signal countH, countV: std_logic_vector(9 downto 0);
 signal char_line: std_logic_vector(79 downto 0);
-signal column : std_logic_vector(6 downto 0);
+signal column : std_logic_vector(9 downto 0);
 
 begin
 
@@ -105,7 +105,7 @@ begin
 	end if;
 end process;
  
- setColors: process(countH, countV, char_line)
+ setColors: process(countH, countV, char_line, column)
 		begin
 
 		case conv_integer(unsigned(countH)) is

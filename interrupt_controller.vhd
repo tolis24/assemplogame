@@ -35,33 +35,22 @@ architecture sync of interrupt_controller is
 	--signal inten	: std_logic;
 	
 begin
+
 	intVector(15 downto 5) <= (others => '0');
 	intflag <= '0' when upSync(3)='0' and downSync(3)='0' and lftSync(3)='0' and rghtSync(3)='0' and slctSync(3)='0' else '1';
-
-
-	upSync(0)   <= up;
-	downSync(0) <= down;
-	lftSync(0)  <= lft;
-	rghtSync(0) <= rght;
-	
-	intVector(0) <= upSync(3);
-	intVector(1) <= downSync(3);
-	intVector(2) <= lftSync(3);
-	intVector(3) <= rghtSync(3);
-	intVector(4) <= slctSync(3);
 	
 	process(clk,rst)
 	begin
 	
 		if rst = '0' then
 		
-			upSync   <= (others => '0');
+			upSync 	<= (others => '0');
 			downSync <= (others => '0');
 			lftSync  <= (others => '0');
 			rghtSync <= (others => '0');
 			slctSync <= (others => '0');
 			
-			intVector <= (others => '0');
+			intVector(4 downto 0) <= (others => '0');
 		
 		elsif rising_edge(clk) then
 		
@@ -69,20 +58,29 @@ begin
 			-- 	inten <= intEnable;
 			-- end if;
 			
+			upSync(0)   <= up;
+			downSync(0) <= down;
+			lftSync(0)  <= lft;
+			rghtSync(0) <= rght;
+			slctSync(0) <= slct;
+			
 			upSync(1)   <= upSync(0);		--Sync(1) <= Sync(0)
 			downSync(1) <= downSync(0);
 			lftSync(1)  <= lftSync(0);
 			rghtSync(1) <= rghtSync(0);
+			slctSync(1) <= slctSync(0);
 			
 			upSync(2)   <= upSync(1);		--Sync(2) <= Sync(1)
 			downSync(2) <= downSync(1);
 			lftSync(2)  <= lftSync(1);
 			rghtSync(2) <= rghtSync(1);
+			slctSync(2) <= slctSync(1);
 			
 			upSync(3)   <= upSync(2);		--Sync(3) <= Sync(2)
 			downSync(3) <= downSync(2);
 			lftSync(3)  <= lftSync(2);
 			rghtSync(3) <= rghtSync(2);
+			slctSync(3) <= slctSync(2);
 			
 			--if inten ='1' then 				-- if Enable = 1 then set intVector at falling edge
 				

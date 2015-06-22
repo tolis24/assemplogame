@@ -10,7 +10,7 @@ end icon_rom;
 
 architecture RTL of icon_rom is
 
-signal row : std_logic_vector(5 downto 0);
+signal row : std_logic_vector(9 downto 0);
 signal address : std_logic_vector(9 downto 0);
 
 begin
@@ -41,7 +41,7 @@ end process;
 
 		
 address(9 downto 6) <= pointer;
-address(5 downto 0) <= row;
+address(5 downto 0) <= row(5 downto 0);
 
 process(address)
 begin

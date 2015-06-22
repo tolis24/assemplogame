@@ -139,19 +139,19 @@ architecture game of Peg is
 	signal fbWen : std_logic;
 	signal pointer : std_logic_vector(3 downto 0);
 	
-	signal countH, countV : std_logic_vector(15 downto 0);
+	signal countH, countV : std_logic_vector(9 downto 0);
 	signal vgadata : std_logic_vector(79 downto 0);
 	
 begin
 	ground <= (others => '0');
 
-	proc: processor port map (clk, rst, iaddr, idata, procAddr, procWen, procOut, procIn, intWen, intOut(5), intflag);
+	proc: processor port map (clk, rst, iaddr, idata, procAddr, procWen, procIn, procOut, intWen, intOut(5), intflag);
 	
 	Mem_ctrl: mem_controller port map (procWen, procAddr, procIn, procOut, dmWen, dmAddr, dmIn, dmOut, fbWen, fbOut, intWen, intOut, intIn);
 	
 	InsMem: ram_infer port map (clk, rst, ground, ground, iaddr, ground(0), idata);
 	
-	DataMem: ram_infer port map (clk, rst, dmOut, dmAddr, dmAddr, procWen, procIn);
+	DataMem: ram_infer port map (clk, rst, dmOut, dmAddr, dmAddr, dmWen, dmIn);
 	
 	Int_ctrl: interrupt_controller port map (clk, rst, intOut(4 downto 0), intWen, up, down, lft, rght, slct, intflag, intIn);
 	

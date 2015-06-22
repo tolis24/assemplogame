@@ -28,7 +28,7 @@ architecture mltplx of mem_controller is
 
 begin
 
- process (procWen, procAddr, procIn, dmIN)
+ process (procWen, procAddr, procIn, dmIn, intIn)
  begin
  
 	if procAddr = "0000000000000001" then  --Address of interrupt Controller (fix)
