@@ -4,9 +4,9 @@
 	sw   2,0,0x0 	#x=0 y=0
 	addi 2,0,0x10
 	sw   2,0,0x0	#x=0 y=1
-	addi 2,0,0x20
+	addi 2,2,0x10
 	sw   2,0,0x0	#x=0 y=2
-	addi 2,0,0x30
+	addi 2,2,0x10
 	sw   2,0,0x0	#x=0 y=3
 	lui  2,0x1
 	sw   2,0,0x0	#x=0 y=4
@@ -16,7 +16,7 @@
 	sw   2,0,0x0	#x=0 y=6
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=0 y=7
-	lui  2,0,0x4
+	lui  2,0x4
 	sw   2,0,0x0	#x=1 y=0
 	addi 2,2,0x10	
 	sw   2,0,0x0	#x=1 y=1
@@ -32,7 +32,7 @@
 	sw   2,0,0x0	#x=1 y=6
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=1 y=7
-	lui  2,0,0x8
+	lui  2,0x8
 	sw   2,0,0x0	#x=2 y=0
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=2 y=1
@@ -48,7 +48,7 @@
 	sw   2,0,0x0	#x=2 y=6
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=2 y=7
-	lui  2,0,0xc
+	lui  2,0xc
 	sw   2,0,0x0	#x=3 y=0
 	addi 2,2,0x12
 	sw   2,0,0x0	#x=3 y=1
@@ -64,7 +64,7 @@
 	sw   2,0,0x0	#x=3 y=6
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=3 y=7
-	lui  2,0,0x10
+	lui  2,0x10
 	sw   2,0,0x0	#x=4 y=0
 	addi 2,2,0x12
 	sw   2,0,0x0	#x=4 y=1
@@ -80,7 +80,7 @@
 	sw   2,0,0x0	#x=4 y=6
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=4 y=7
-	lui  2,0,0x14
+	lui  2,0x14
 	sw   2,0,0x0	#x=5 y=0
 	addi 2,2,0x12
 	sw   2,0,0x0	#x=5 y=1
@@ -96,7 +96,7 @@
 	sw   2,0,0x0	#x=5 y=6
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=5 y=7
-	lui  2,0,0x18
+	lui  2,0x18
 	sw   2,0,0x0	#x=6 y=0
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=6 y=1
@@ -112,7 +112,7 @@
 	sw   2,0,0x0	#x=6 y=6
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=6 y=7
-	lui  2,0,0x1c
+	lui  2,0x1c
 	sw   2,0,0x0	#x=7 y=0
 	addi 2,2,0x10
 	sw   2,0,0x0	#x=7 y=1
