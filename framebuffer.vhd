@@ -58,7 +58,13 @@ col <= 	"000" when unsigned(countH) < 80 else
 process (clk, rst) --memory behavior
 
 	begin
-		if rising_edge(clk) then
+		if rst = '0' then
+			for i in 0 to 7 loop 
+				for j in 0 to 7 loop
+					frame(i,j) <= (others => '0');
+				end loop;
+			end loop;
+		elsif rising_edge(clk) then
 			if (we = '1' and unsigned(X) < 8 and unsigned(Y) < 8) then
 				frame(conv_integer(unsigned(X)),conv_integer(unsigned(Y))) <= V;
 			end if;

@@ -142,7 +142,9 @@ architecture game of Peg is
 	signal countH, countV : std_logic_vector(9 downto 0);
 	signal vgadata : std_logic_vector(79 downto 0);
 	
+	
 begin
+
 	ground <= (others => '0');
 
 	proc: processor port map (clk, rst, iaddr, idata, procAddr, procWen, procIn, procOut, intWen, intOut(5), intflag);

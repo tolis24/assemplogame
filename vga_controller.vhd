@@ -75,12 +75,14 @@ process(clk, rst)
 	end if;
  end process;
  
- set_buffer: process(clk, rst)
+set_buffer: process(clk, rst)
 		begin
 			if rising_edge(clk) then --buffer to cut long path of countV
 				char_line <= dataIn;					
 			end if;
 end process;
+
+--char_line <= dataIn;
 
 process (countH)
 begin 
