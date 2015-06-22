@@ -17,7 +17,8 @@ port (		clk 	: in std_logic;			-- clock
 			rght	:	in std_logic;
 			slct	:	in std_logic;
 			
-			intVector : out std_logic_vector(4 downto 0)	-- 0 up, 1 down, 2 left, 3 right, 4 select
+			intflag : out std_logic;						-- interrupt flag for processor
+			intVector : out std_logic_vector(15 downto 0)	-- 0 up, 1 down, 2 left, 3 right, 4 select , others Don't care 0
 		);
 		
 end interrupt_controller;
@@ -33,6 +34,10 @@ architecture sync of interrupt_controller is
 	--signal inten	: std_logic;
 	
 begin
+	intVector(15 downto 5) <= (others => '0');
+	intflag <= '0' when upSync(3)='0' and downSync(3)='0' and lftSync(3)='0' and rghtSync(3)='0' and slctSync(3)='0' else '1';
+
+
 	upSync(0)   <= up;
 	downSync(0) <= down;
 	lftSync(0)  <= lft;
@@ -56,8 +61,6 @@ begin
 			slctSync <= (others => '0');
 			
 			intVector <= (others => '0');
-			
-			--inten <= '0';
 		
 		elsif rising_edge(clk) then
 		

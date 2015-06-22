@@ -22,7 +22,8 @@ port (		clk 	: in std_logic;			-- clock
 			fdOut		: out std_logic_vector(15 downto 0);
 			
 			intWen		: out std_logic;						--signals to Interrupt Controller
-			intOut		: out std_logic_vector(15 downto 0)
+			intOut		: out std_logic_vector(15 downto 0);
+			intIn		: in std_logic_vector(15 downto 0)
 		);
 		
 end mem_controller;
@@ -36,7 +37,7 @@ begin
  
 	if procAddr = "0000000000000000" then  --Address of interrupt Controller (fix)
 	
-		procOut	<= (others => '0');
+		procOut	<= intIn;
 	
 		dmWen	<= '0';
 		dmAddr	<= (others => '0');
@@ -49,7 +50,21 @@ begin
 		intWen <= procWen;
 		intOut <= procIn;
 		
-	elsif procAddr < "0000000010111011100" then 				--Length (1500) of DataMem (fix)
+	elsif procAddr = "0000000000000001" then -- Address of Frame buffer (fix)
+		procOut <= (others => '0');
+	
+		dmWen	<= '0';
+		dmAddr	<= (others => '0');
+		dmOut 	<= (others => '0');
+	
+		fbWen	<= procWen;
+		fbAddr	<= procAddr;
+		fdOut 	<= procIn;
+	
+		intWen 	<= '0';
+		intOut	<= (others => '0');
+		
+	else
 		
 		procOut <= dmIN;
 	
@@ -64,19 +79,7 @@ begin
 		intWen 	<= '0';
 		intOut	<= (others => '0');
 	
-	else
-		procOut <= (others => '0');
 	
-		dmWen	<= '0';
-		dmAddr	<= (others => '0');
-		dmOut 	<= (others => '0');
-	
-		fbWen	<= procWen;
-		fbAddr	<= procAddr;
-		fdOut 	<= procIn;
-	
-		intWen 	<= '0';
-		intOut	<= (others => '0');
 	
 	end if;
  

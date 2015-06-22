@@ -17,9 +17,10 @@ port (	clk 	: in std_logic;								-- clock
 		dout 	: out std_logic_vector(15 downto 0);	-- data write
 		din 	: in std_logic_vector(15 downto 0);		-- data read
 			
-		intVector 	: in std_logic_vector(4 downto 0);	-- 0 up, 1 down, 2 left, 3 right, 4 select
-		wintflag	: in std_logic;						-- enable to write at interrupt flag
-		intEn		: in std_logic						--value to write at interrupt flag				
+		--intVector 	: in std_logic_vector(4 downto 0);	-- 0 up, 1 down, 2 left, 3 right, 4 select
+		wintEn	: in std_logic;						-- enable to write at interrupt software enable
+		intEn	: in std_logic;						--value to write at interrupt flag
+		intflag	: in std_logic						-- Interrupt to Handle
 	);
 		
 end processor;
@@ -35,14 +36,14 @@ architecture proc of processor is
 	signal ra, rb, ALUOut: std_logic_vector(15 downto 0);		-- registers a, b, ALUOut
 	signal opcode 			: std_logic_vector(2 downto 0);		-- operation code
 	signal cycle 			: cycles;							-- cycles
-	signal intflag			: std_logic;						-- Interrupt flag
+	signal HWintEn, SWintEn	: std_logic;
+	--signal intflag			: std_logic;						-- Interrupt flag
 --	signal counter       : std_logic_vector(27 downto 0);
 	
 begin
-	-- Fetch next instruction from pc (program counter)
-		iaddr <= pc;
-	-- store 3bit operation to signal ir(15 downto 13)
---		opcode <= ir(15 downto 13);
+	iaddr <= pc;
+	HWintEn <= '0' when unsigned(pc) > 0 and unsigned(pc) < 10 else '1';  -- (fix) Program Counter range to disable interrupts
+
 		
 	process (clk, rst) 
 			
@@ -57,7 +58,7 @@ begin
 				end loop;
 				
 			-- Reset interrupt flag
-				intflag <= '0';
+				SWintEn <= '0';
 				
 			-- Reset Program Counter
 				pc <= (others => '0');
@@ -69,8 +70,8 @@ begin
 				
 			elsif rising_edge(clk) then
 			
-				if wintflag ='1' then 
-					intflag <= intEn ;
+				if wintEn ='1' then 
+					SWintEn <= intEn ;
 				end if;
 			
 				case cycle is 
@@ -78,26 +79,13 @@ begin
 					
 						cycle <= fetch;
 						
-						if intflag = '0' then
-						
-							if intVector(0) = '1' then 
-								pc <= (others => '0'); --address (of InsMem) of up interrupt Handler  (fix)
-							elsif intVector(1) ='1' then
-								pc <= (others => '0'); --address (of InsMem) of down interrupt Handler (fix)
-							elsif intVector(2) ='1' then
-								pc <= (others => '0'); --address (of InsMem) of left interrupt Handler (fix)
-							elsif intVector(3) ='1' then
-								pc <= (others => '0'); --address (of InsMem) of right interrupt Handler (fix)
-							elsif intVector(4) ='1' then
-								pc <= (others => '0'); --address (of InsMem) of select interrupt Handler (fix)
-							end if;
-							
-							if (intVector /= "00000") then 
-								daddr <= (others =>'0'); -- address (of DatMem) to store the normal flow (fix)
-								dwen <= '1';
-								intflag <= '1';
-								cycle <= dummy;
-							end if;
+						if HWintEn = '1'and SWintEn = '1' and intflag = '1' then
+							pc <= (others => '0'); --address (of InsMem) of up interrupt Handler  (fix)
+							daddr <= (others =>'0'); -- address (of DatMem) to store the normal flow (fix)
+							dout <= pc;
+							dwen <= '1';
+							--intEn <= '0';			-- caution! at setting intEn at the end of the Handler no interrupt should waiting (have to fix it)
+							cycle <= dummy;
 						end if;
 						
 					when dummy =>
