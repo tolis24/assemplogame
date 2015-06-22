@@ -1,0 +1,155 @@
+-- Copyright (C) 1991-2013 Altera Corporation
+-- Your use of Altera Corporation's design tools, logic functions 
+-- and other software and tools, and its AMPP partner logic 
+-- functions, and any output files from any of the foregoing 
+-- (including device programming or simulation files), and any 
+-- associated documentation or information are expressly subject 
+-- to the terms and conditions of the Altera Program License 
+-- Subscription Agreement, Altera MegaCore Function License 
+-- Agreement, or other applicable license agreement, including, 
+-- without limitation, that your use is for the sole purpose of 
+-- programming logic devices manufactured by Altera and sold by 
+-- Altera or its authorized distributors.  Please refer to the 
+-- applicable agreement for further details.
+
+-- Quartus II generated Memory Initialization File (.mif)
+
+WIDTH=16;
+DEPTH=256;
+
+ADDRESS_RADIX=UNS;
+DATA_RADIX=HEX;
+
+CONTENT BEGIN
+0    :    0000;
+1    :    2401;
+2    :    6800;
+3    :    8800;
+4    :    2810;
+5    :    8800;
+6    :    2910;
+7    :    8800;
+8    :    2910;
+9    :    8800;
+10    :    6800;
+11    :    8800;
+12    :    2910;
+13    :    8800;
+14    :    2910;
+15    :    8800;
+16    :    2910;
+17    :    8800;
+18    :    6800;
+19    :    8800;
+20    :    2910;
+21    :    8800;
+22    :    2910;
+23    :    8800;
+24    :    2912;
+25    :    8800;
+26    :    2910;
+27    :    8800;
+28    :    2910;
+29    :    8800;
+30    :    290e;
+31    :    8800;
+32    :    2910;
+33    :    8800;
+34    :    6800;
+35    :    8800;
+36    :    2910;
+37    :    8800;
+38    :    2910;
+39    :    8800;
+40    :    2912;
+41    :    8800;
+42    :    2910;
+43    :    8800;
+44    :    2910;
+45    :    8800;
+46    :    290e;
+47    :    8800;
+48    :    2910;
+49    :    8800;
+50    :    6800;
+51    :    8800;
+52    :    2912;
+53    :    8800;
+54    :    2910;
+55    :    8800;
+56    :    2910;
+57    :    8800;
+58    :    2910;
+59    :    8800;
+60    :    2910;
+61    :    8800;
+62    :    2910;
+63    :    8800;
+64    :    2910;
+65    :    8800;
+66    :    6800;
+67    :    8800;
+68    :    2912;
+69    :    8800;
+70    :    2910;
+71    :    8800;
+72    :    2910;
+73    :    8800;
+74    :    290f;
+75    :    8800;
+76    :    2911;
+77    :    8800;
+78    :    2910;
+79    :    8800;
+80    :    2910;
+81    :    8800;
+82    :    6800;
+83    :    8800;
+84    :    2912;
+85    :    8800;
+86    :    2910;
+87    :    8800;
+88    :    2910;
+89    :    8800;
+90    :    2910;
+91    :    8800;
+92    :    2910;
+93    :    8800;
+94    :    2910;
+95    :    8800;
+96    :    2910;
+97    :    8800;
+98    :    6800;
+99    :    8800;
+100    :    2910;
+101    :    8800;
+102    :    2910;
+103    :    8800;
+104    :    2912;
+105    :    8800;
+106    :    2910;
+107    :    8800;
+108    :    2910;
+109    :    8800;
+110    :    290e;
+111    :    8800;
+112    :    2910;
+113    :    8800;
+114    :    6800;
+115    :    8800;
+116    :    2910;
+117    :    8800;
+118    :    2910;
+119    :    8800;
+120    :    2912;
+121    :    8800;
+122    :    2910;
+123    :    8800;
+124    :    2910;
+125    :    8800;
+126    :    290e;
+127    :    8800;
+128    :    2910;
+129    :    8800;
+	[130..255]  :   0000;
+END;
