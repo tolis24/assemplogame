@@ -9,18 +9,20 @@ class Ideone
 {
 	public static void main (String[] args) throws java.lang.Exception
 	{
-		 int ch,i;
-		 i=1;
-		 System.out.print (i+"    :    ");
-		 	  i++;
-		   while ((ch = System.in.read ()) != -1){
-		 if (ch=='\n'){
+		int ch,i;
+		i=1;
+		System.out.print (i+"    :    ");
+		i++;
+		 
+		while ((ch = System.in.read ()) != -1){
+			if (ch=='\n'){
 		 	  System.out.print (";\n"+i+"    :    ");
 		 	  i++;
-		 }else{
-		   
-		   
-         System.out.print ((char) ch);}}
-         System.out.print (';');
-
-}}
+			}
+			else{
+				System.out.print ((char) ch);
+			}
+		}
+		System.out.print (';');
+	}
+}
