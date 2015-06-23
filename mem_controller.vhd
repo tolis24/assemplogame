@@ -31,7 +31,7 @@ begin
  process (procWen, procAddr, procIn, dmIn, intIn)
  begin
  
-	if procAddr = "0000000000000001" then  --Address of interrupt Controller (fix)
+	if procAddr = "0000000001000001" then  --Address of interrupt Controller (fix)
 	
 		procOut	<= intIn;
 	
@@ -45,7 +45,7 @@ begin
 		intWen <= procWen;
 		intOut <= procIn;
 		
-	elsif procAddr = "0000000000000000" then -- Address of Frame buffer (fix)
+	elsif procAddr = "0000000001000000" then -- Address of Frame buffer (fix)
 		procOut <= (others => '0');
 	
 		dmWen	<= '0';
