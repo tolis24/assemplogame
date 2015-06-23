@@ -8,10 +8,10 @@ entity framebuffer is port(
 	  
 	  we            : in  std_logic;
       dataIn        : in  std_logic_vector(15 downto 0);	-- Input data should have the following format
-															-- (15 downto 12) don't care
-															-- (11 downto 8) row number (X)
-															-- (8 downto 4) column number (Y)
-															-- (3 downto 0) value to store (V)
+															-- (15 downto 10) don't care
+															-- (9 downto 7) row number (X)3bits
+															-- (6 downto 4) column number (Y) 3bits
+															-- (3 downto 0) value to store (V) 4bits
 	  
       countH  : in  std_logic_vector(9 downto 0);
       countV  : in  std_logic_vector(9 downto 0);
@@ -25,13 +25,14 @@ type memory is array(integer range 0 to 7, integer range 0 to 7) of std_logic_ve
 
 signal frame : memory;
 signal row, col : std_logic_vector(2 downto 0);
-signal X,Y,V : std_logic_vector(3 downto 0);
+signal X,Y : std_logic_vector(2 downto 0);
+signal V: std_logic_vector(3 downto 0);
 
 
 begin
 
-X <= dataIn(11 downto 8);	-- Row
-Y <= dataIn(7 downto 4);	-- Column
+X <= dataIn(9 downto 7);	-- Row
+Y <= dataIn(6 downto 4);	-- Column
 V <= dataIn(3 downto 0);	-- Value
 
 
@@ -65,7 +66,7 @@ process (clk, rst) --memory behavior
 				end loop;
 			end loop;
 		elsif rising_edge(clk) then
-			if (we = '1' and unsigned(X) < 8 and unsigned(Y) < 8) then
+			if we = '1' then
 				frame(conv_integer(unsigned(X)),conv_integer(unsigned(Y))) <= V;
 			end if;
 			
