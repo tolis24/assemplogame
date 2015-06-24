@@ -193,7 +193,10 @@ gotoslct:	movi r3, slcthandler
 slcthop:	movi r3 , intend	#if reach this point no interrupt is handled so goto in ending
 			jalr r0, r3
 			
-uphandler:	lw 		r1, r7, 20		#Get cursor address
+uphandler:	addi r3, r0, 1  		#Reset upflag
+			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
 			addi	r3, r1, -8		#Create address above cursor
 			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
 			nand	r3, r3, r4
@@ -220,13 +223,13 @@ uphandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			addi r3, r0, 1  		#Reset upflag
-			sw r3, r7, 1
-			
 			movi r3, intend
 			jalr r0, r3			#jumps to intend
 
-downhandler:	lw 		r1, r7, 20		#Get cursor address
+downhandler:	addi r3, r0, 2  		#Reset downflag
+			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
 			addi	r3, r1, 8		#Create address below cursor
 			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
 			nand	r3, r3, r4
@@ -253,13 +256,13 @@ downhandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			addi r3, r0, 2  		#Reset downflag
-			sw r3, r7, 1
-			
 			movi r3, intend
 			jalr r0, r3			#jumps to intend
 
-lfthandler:	lw 		r1, r7, 20		#Get cursor address
+lfthandler:	addi r3, r0, 4  		#Reset lftflag
+			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
 			addi	r3, r1, -1		#Create address above cursor
 			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
 			nand	r3, r3, r4
@@ -286,13 +289,13 @@ lfthandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			addi r3, r0, 4  		#Reset lftflag
-			sw r3, r7, 1
-			
 			movi r3, intend
 			jalr r0, r3			#jumps to intend
 
-rghthandler:	lw 		r1, r7, 20		#Get cursor address
+rghthandler: addi r3, r0, 8  		#Reset rghtflag
+			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
 			addi	r3, r1, 1		#Create address above cursor
 			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
 			nand	r3, r3, r4
@@ -319,20 +322,18 @@ rghthandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			addi r3, r0, 8  		#Reset rghtflag
-			sw r3, r7, 1
-			
 			movi r3, intend
 			jalr r0, r3			#jumps to intend
 
-slcthandler: lw r1, r7, 20 		#load cursor to r1
+slcthandler: addi r5, r0, 16  		#Reset slctflag
+			sw r3, r7, 1
+			
+			lui r7, 0x40		#set r7 to 64 (DataMem Offset) Just to be sure
+			lw r1, r7, 20 		#load cursor to r1
 			lw r2, r1, 0		#load Tile at cursor to r2
 			
 			lw r3, r7, 21		#load selected to r3
 			lw r4, r3, 0		#load the selected tile to r4
-			
-			addi r5, r0, 16  		#Reset slctflag
-			sw r3, r7, 1
 			
 			beq r3, r0, mkmove		#if none selected
 			addi r5, r2, -5			#
@@ -361,45 +362,53 @@ slcthandler: lw r1, r7, 20 		#load cursor to r1
 	mkmove: nand r5, r1, r1
 			addi r5, r5, 1		#r5 now equals -cursor
 			add r5, r5, r3		#so r5 is now selected-cursor
+	
+#(updir)	
+			addi r6, r5, -16	
+			beq r6, r0, downdir	#if cursor above select and at the correct place goto updir
 			
-			addi r6, r5, -16
-			beq r6, r0, updir	#if cursor above select and at the correct place goto updir
-			addi r6, r5, 16
-			beq r6, r0, downdir	#if cursor below select and at the correct place goto downdir
-			addi r6, r5, -2
-			beq r6, r0, lftdir	#if cursor left of select and at the correct place goto lftdir
-			addi r6, r5, 2
-			beq r6, r0, rghtdir	#if cursor right of select and at the correct place goto rghtdir
+			addi r5, r3, -8	#r5 has the address of Middle Tile (or direction)
 			
-			movi r6, deselect	#if not correct move deselect the selected
-			jalr r0, r6			# goto deselect
-			
-		updir:	addi r5, r3, -8	#r3 has the address of Middle Tile (or direction)
 			movi r6, endofdir
 			jalr r0, r6
-		
-		downdir:	addi r5, r3, 8
+				
+	downdir:	addi r6, r5, 16
+			beq r6, r0, lftdir	#if cursor below select and at the correct place set Middle tile address
+			
+			addi r5, r3, 8
+			
 			movi r6, endofdir
 			jalr r0, r6
 			
-		lftdir:	addi r5, r3, -1
+	lftdir:		addi r6, r5, -2
+			beq r6, r0, rghtdir	#if cursor left of select and at the correct place set Middle tile address
+			
+			addi r5, r3, -1
+			
 			movi r6, endofdir
 			jalr r0, r6
 			
-		rghtdir:	addi r5, r3, 1
+	rghtdir:	addi r6, r5, 2
+			beq r6, r0, whtodeslct	#if cursor right of select and at the correct place set Middle tile address
+			
+			addi r5, r3, 1
+			
 			movi r6, endofdir
 			jalr r0, r6
+			
+	whtodeslct:	movi r6, deselect
+				jalr r0, r6
 			
 		endofdir:	lw r6, r5, 0	# now we have r1=Cursor r2=Ctile r3=Selected r4=Stile r5=Middle r6=Mtile
 			addi r2, r2, -4			#to check if tile = 4
 			addi r4, r4, -8
 			addi r6, r6, -2
-			add r2, r2, r4
-			add r2, r2, r6			#if r2 =0 then all tiles are ok to proceed to move
-			beq r2, r0, deselect	#else goto deselect
+			beq r2, r0, deselect
+			beq r4, r0, deselect			#if r2, r4 and r6 =0 then all tiles are ok to proceed to move
+			beq r6, r0, deselect			#else goto deselect
 			
-			addi r2, r0, 1
-			addi r4, r0, 5
+			addi r2, r0, 5
+			addi r4, r0, 1
 			addi r6, r0, 1			#set new tile values
 			
 			sw r2, r1, 0
@@ -442,7 +451,8 @@ slcthandler: lw r1, r7, 20 		#load cursor to r1
 ####			beq r5, r0, mkmove	#!!!CAUTION may label should change
 
 			
-	deselect:	lw r4, r3, 0		#bring selected tile
+	deselect:	lw r3, r7, 21	#bring selected
+			lw r4, r3, 0		#bring selected tile
 			addi r4, r4, -6		#deselect the tile
 			sw r4, r3, 0		#store deselected tile to board
 			add r3,r3,r3
