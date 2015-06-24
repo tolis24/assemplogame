@@ -9,7 +9,7 @@ port (		clk 	: in std_logic;			-- clock
 			
 			--wint	: in std_logic;						-- write interrupt enable
 			--intEnable:in std_logic;						-- interrupt enable
-			rstVector	: in std_logic_vector(4 downto 0); -- Vector to rst interrupts
+			rstVector	: in std_logic_vector(15 downto 0); -- Vector to rst interrupts
 			Wen			: in std_logic;
 			
 			up		:	in std_logic;		-- button inputs
@@ -19,7 +19,9 @@ port (		clk 	: in std_logic;			-- clock
 			slct	:	in std_logic;
 			
 			intflag : out std_logic;						-- interrupt flag for processor
-			intVector : out std_logic_vector(15 downto 0)	-- 0 up, 1 down, 2 left, 3 right, 4 select , others Don't care 0
+			intVector : out std_logic_vector(15 downto 0);	-- 0 up, 1 down, 2 left, 3 right, 4 select , others Don't care 0
+			wintEn	: out std_logic;						-- enable to write at interrupt software enable
+			intEn	: out std_logic						--value to write at interrupt software enable
 		);
 		
 end interrupt_controller;
@@ -36,6 +38,9 @@ architecture sync of interrupt_controller is
 	--signal inten	: std_logic;
 	
 begin
+
+	wintEn <= Wen and rstVector(6);
+	intEn <= Wen and rstVector(5);
 
 	intVector(15 downto 5) <= (others => '0');
 	intVector(4 downto 0) <=	intvctr;

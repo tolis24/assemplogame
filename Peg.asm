@@ -220,7 +220,7 @@ uphandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			movi r3, 97  		#Enable SWint and rst upflag
+			addi r3, r0, 1  		#Reset upflag
 			sw r3, r7, 1
 			
 			movi r3, intend
@@ -253,7 +253,7 @@ downhandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			movi r3, 98  		#Enable SWint and rst upflag
+			addi r3, r0, 2  		#Reset downflag
 			sw r3, r7, 1
 			
 			movi r3, intend
@@ -286,7 +286,7 @@ lfthandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			movi r3, 100  		#Enable SWint and rst upflag
+			addi r3, r0, 4  		#Reset lftflag
 			sw r3, r7, 1
 			
 			movi r3, intend
@@ -319,7 +319,7 @@ rghthandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			movi r3, 104  		#Enable SWint and rst upflag
+			addi r3, r0, 8  		#Reset rghtflag
 			sw r3, r7, 1
 			
 			movi r3, intend
@@ -337,3 +337,6 @@ intend:		lui r7, 0x40		#set r7 to 64 (DataMem Offset) # closing interrupt Handle
 			
 			lw r7, r7, 2		#load hook address of normal flow at r7
 			jalr r0, r7			#Wheeee back to the normal flow
+			
+
+			
