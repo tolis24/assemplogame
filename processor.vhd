@@ -42,7 +42,7 @@ architecture proc of processor is
 	
 begin
 	iaddr <= pc;
-	HWintEn <= '0' when unsigned(pc) > 0 and unsigned(pc) < 10 else '1';  -- (fix) Program Counter range to disable interrupts
+	HWintEn <= '0' when unsigned(pc) > 125 else '1';  -- (fix) Program Counter range to disable interrupts
 
 		
 	process (clk, rst) 
@@ -80,8 +80,8 @@ begin
 						cycle <= fetch;
 						
 						if HWintEn = '1'and SWintEn = '1' and intflag = '1' then
-							pc <= (others => '0'); --address (of InsMem) of up interrupt Handler  (fix)
-							daddr <= (others =>'0'); -- address (of DatMem) to store the normal flow (fix)
+							pc <= 		"0000000001111111"; --address (of InsMem) of up interrupt Handler  (fix)
+							daddr <= 	"0000000001000010"; -- address (of DatMem) to store the normal flow (fix)
 							dout <= pc;
 							dwen <= '1';
 							--intEn <= '0';			-- caution! at setting intEn at the end of the Handler no interrupt should waiting (have to fix it)
@@ -209,7 +209,8 @@ begin
 							
 						-- lw : R[regA] <= RegFile(R[regB] + immed) 
 						elsif ir(15 downto 13) = "101" then
-							reg(conv_integer(unsigned(ir(12 downto 10)))) <= din;
+							-- Just wait for this cycle
+							--reg(conv_integer(unsigned(ir(12 downto 10)))) <= din;
 						
 						-- add, addi, nand, lui, jalr: R[regA] <= ALUOut
 						else
@@ -223,6 +224,9 @@ begin
 						--sw
 						if ir(15 downto 13) = "100" then 
 							dwen <= '0';
+						--lw
+						elsif ir(15 downto 13) = "101" then
+							reg(conv_integer(unsigned(ir(12 downto 10)))) <= din;
 						end if;
 						--bne
 						if ir(15 downto 13) = "110" then 
