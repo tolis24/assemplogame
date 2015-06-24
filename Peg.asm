@@ -194,13 +194,15 @@ slcthop:	movi r3 , intend	#if reach this point no interrupt is handled so goto i
 			jalr r0, r3
 			
 uphandler:	lw 		r1, r7, 20		#Get cursor address
-			addi	r3, r1, -8		#Get address above cursor !!caution Add mask after substruction
-#			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
-#			nand	r3, r3, r4
-#			nand	r3, r3, r3
+			addi	r3, r1, -8		#Create address above cursor !!caution Add mask after substruction
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
 			
 			lw		r2, r1, 0		#Get value(tile) of cursor
 			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
 			add 	r1, r1, r1
 			add 	r1, r1, r1
 			add 	r1, r1, r1
@@ -210,6 +212,7 @@ uphandler:	lw 		r1, r7, 20		#Get cursor address
 			
 			lw		r2, r3, 0		#Get value of new cursor
 			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
 			add 	r3, r3, r3
 			add 	r3, r3, r3
 			add 	r3, r3, r3
