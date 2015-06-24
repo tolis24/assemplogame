@@ -31,26 +31,28 @@ architecture sync of interrupt_controller is
 	signal lftSync : std_logic_vector(3 downto 0);
 	signal rghtSync : std_logic_vector(3 downto 0);
 	signal slctSync : std_logic_vector(3 downto 0);
+	signal intvctr	: std_logic_vector(4 downto 0);
 
 	--signal inten	: std_logic;
 	
 begin
 
 	intVector(15 downto 5) <= (others => '0');
-	intflag <= '0' when upSync(3)='0' and downSync(3)='0' and lftSync(3)='0' and rghtSync(3)='0' and slctSync(3)='0' else '1';
+	intVector(4 downto 0) <=	intvctr;
+	intflag <= '0' when intvctr = "00000" else '1';
 	
 	process(clk,rst)
 	begin
 	
 		if rst = '0' then
 		
-			upSync 	<= (others => '0');
-			downSync <= (others => '0');
-			lftSync  <= (others => '0');
-			rghtSync <= (others => '0');
-			slctSync <= (others => '0');
+			--upSync 	<= (others => '0');  --WRONG it gives fake pulse
+			--downSync <= (others => '0');
+			--lftSync  <= (others => '0');
+			--rghtSync <= (others => '0');
+			--slctSync <= (others => '0');
 			
-			intVector(4 downto 0) <= (others => '0');
+			intvctr(4 downto 0) <= (others => '0');
 		
 		elsif rising_edge(clk) then
 		
@@ -81,51 +83,49 @@ begin
 			lftSync(3)  <= lftSync(2);
 			rghtSync(3) <= rghtSync(2);
 			slctSync(3) <= slctSync(2);
-			
-			--if inten ='1' then 				-- if Enable = 1 then set intVector at falling edge
 				
 				
-			-- Setting interrupts
-			if upSync(2) = '1' and upSync(3) ='0' and rstVector(0) = '0' then	
-				intVector(0) <= '1';
+			-- Setting interrupts at Falling Edge
+			if upSync(2) = '0' and upSync(3) ='1' and rstVector(0) = '0' then	
+				intvctr(0) <= '1';
 			end if;
 			
-			if downSync(2) = '1' and downSync(3) ='0' and rstVector(1) = '0' then	
-				intVector(1) <= '1';
+			if downSync(2) = '0' and downSync(3) ='1' and rstVector(1) = '0' then	
+				intvctr(1) <= '1';
 			end if;
 			
-			if lftSync(2) = '1' and lftSync(3) ='0' and rstVector(2) = '0' then	
-				intVector(2) <= '1';
+			if lftSync(2) = '0' and lftSync(3) ='1' and rstVector(2) = '0' then	
+				intvctr(2) <= '1';
 			end if;
 			
-			if rghtSync(2) = '1' and rghtSync(3) ='0' and rstVector(3) = '0' then	
-				intVector(3) <= '1';
+			if rghtSync(2) = '0' and rghtSync(3) ='1' and rstVector(3) = '0' then	
+				intvctr(3) <= '1';
 			end if;
 			
-			if slctSync(2) = '1' and slctSync(3) ='0' and rstVector(4) = '0' then	
-				intVector(4) <= '1';
+			if slctSync(2) = '0' and slctSync(3) ='1' and rstVector(4) = '0' then	
+				intvctr(4) <= '1';
 			end if;
 			
 			
 			--Resetting interrupts
 			if rstVector(0) = '1' and Wen = '1' then
-				intVector(0) <= '0';
+				intvctr(0) <= '0';
 			end if;
 			
 			if rstVector(1) = '1' and Wen = '1' then
-				intVector(1) <= '0';
+				intvctr(1) <= '0';
 			end if;
 			
 			if rstVector(2) = '1' and Wen = '1' then
-				intVector(2) <= '0';
+				intvctr(2) <= '0';
 			end if;
 			
 			if rstVector(3) = '1' and Wen = '1' then
-				intVector(3) <= '0';
+				intvctr(3) <= '0';
 			end if;
 			
 			if rstVector(4) = '1' and Wen = '1' then
-				intVector(4) <= '0';
+				intvctr(4) <= '0';
 			end if;
 		
 		end if;
