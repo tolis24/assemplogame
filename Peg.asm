@@ -194,7 +194,7 @@ slcthop:	movi r3 , intend	#if reach this point no interrupt is handled so goto i
 			jalr r0, r3
 			
 uphandler:	lw 		r1, r7, 20		#Get cursor address
-			addi	r3, r1, -8		#Create address above cursor !!caution Add mask after substruction
+			addi	r3, r1, -8		#Create address above cursor
 			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
 			nand	r3, r3, r4
 			nand	r3, r3, r3
@@ -226,11 +226,104 @@ uphandler:	lw 		r1, r7, 20		#Get cursor address
 			movi r3, intend
 			jalr r0, r3			#jumps to intend
 
-downhandler: nop
+downhandler:	lw 		r1, r7, 20		#Get cursor address
+			addi	r3, r1, 8		#Create address below cursor
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
+			
+			lw		r2, r1, 0		#Get value(tile) of cursor
+			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1		#r1(cursor address) << 4
+			add		r2, r1, r2
+			sw		r2, r7, 0  		#Update cursors tile
+			
+			lw		r2, r3, 0		#Get value of new cursor
+			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3		# r3 << 4
+			add		r2, r3, r2
+			sw		r2, r7, 0  		#sent tofb cursored icon
+			
+			movi r3, 98  		#Enable SWint and rst upflag
+			sw r3, r7, 1
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
 
-lfthandler:	nop
+lfthandler:	lw 		r1, r7, 20		#Get cursor address
+			addi	r3, r1, -1		#Create address above cursor
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
+			
+			lw		r2, r1, 0		#Get value(tile) of cursor
+			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1		#r1(cursor address) << 4
+			add		r2, r1, r2
+			sw		r2, r7, 0  		#Update cursors tile
+			
+			lw		r2, r3, 0		#Get value of new cursor
+			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3		# r3 << 4
+			add		r2, r3, r2
+			sw		r2, r7, 0  		#sent tofb cursored icon
+			
+			movi r3, 100  		#Enable SWint and rst upflag
+			sw r3, r7, 1
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
 
-rghthandler: nop
+rghthandler:	lw 		r1, r7, 20		#Get cursor address
+			addi	r3, r1, 1		#Create address above cursor
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
+			
+			lw		r2, r1, 0		#Get value(tile) of cursor
+			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1		#r1(cursor address) << 4
+			add		r2, r1, r2
+			sw		r2, r7, 0  		#Update cursors tile
+			
+			lw		r2, r3, 0		#Get value of new cursor
+			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3		# r3 << 4
+			add		r2, r3, r2
+			sw		r2, r7, 0  		#sent tofb cursored icon
+			
+			movi r3, 104  		#Enable SWint and rst upflag
+			sw r3, r7, 1
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
 
 slcthandler: nop
 
@@ -244,6 +337,3 @@ intend:		lui r7, 0x40		#set r7 to 64 (DataMem Offset) # closing interrupt Handle
 			
 			lw r7, r7, 2		#load hook address of normal flow at r7
 			jalr r0, r7			#Wheeee back to the normal flow
-			
-
-			
