@@ -325,7 +325,139 @@ rghthandler:	lw 		r1, r7, 20		#Get cursor address
 			movi r3, intend
 			jalr r0, r3			#jumps to intend
 
-slcthandler: nop
+slcthandler: lw r1, r7, 20 		#load cursor to r1
+			lw r2, r1, 0		#load Tile at cursor to r2
+			
+			lw r3, r7, 21		#load selected to r3
+			lw r4, r3, 0		#load the selected tile to r4
+			
+			addi r5, r0, 16  		#Reset slctflag
+			sw r3, r7, 1
+			
+			beq r3, r0, mkmove		#if none selected
+			addi r5, r2, -5			#
+			
+			beq r5, r0, whintent	#and Cursor tile =5 (filled with cursor)   	!!!CAUTION beq out of range so use of wormhole
+			movi r5, whintenhop
+			jalr r0, r5
+	whintent: movi r5, intend
+			jalr r0, r5
+			
+	whintenhop:	addi r2, r2, 6			#change cursor tile to 11 (filled with cursor and selected)
+			sw r1, r7, 21			#set selected <- cursor
+			sw r2, r1, 0			#save new tile at board
+			
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			
+			add r2, r1, r2			#coding for framebuffer
+			sw r2, r7, 0			#send new tile to fb
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
+			
+	mkmove: nand r5, r1, r1
+			addi r5, r5, 1		#r5 now equals -cursor
+			add r5, r5, r3		#so r5 is now selected-cursor
+			
+			addi r6, r5, -16
+			beq r6, r0, updir	#if cursor above select and at the correct place goto updir
+			addi r6, r5, 16
+			beq r6, r0, downdir	#if cursor below select and at the correct place goto downdir
+			addi r6, r5, -2
+			beq r6, r0, lftdir	#if cursor left of select and at the correct place goto lftdir
+			addi r6, r5, 2
+			beq r6, r0, rghtdir	#if cursor right of select and at the correct place goto rghtdir
+			
+			movi r6, deselect	#if not correct move deselect the selected
+			jalr r0, r6			# goto deselect
+			
+		updir:	addi r5, r3, -8	#r3 has the address of Middle Tile (or direction)
+			movi r6, endofdir
+			jalr r0, r6
+		
+		downdir:	addi r5, r3, 8
+			movi r6, endofdir
+			jalr r0, r6
+			
+		lftdir:	addi r5, r3, -1
+			movi r6, endofdir
+			jalr r0, r6
+			
+		rghtdir:	addi r5, r3, 1
+			movi r6, endofdir
+			jalr r0, r6
+			
+		endofdir:	lw r6, r5, 0	# now we have r1=Cursor r2=Ctile r3=Selected r4=Stile r5=Middle r6=Mtile
+			addi r2, r2, -4			#to check if tile = 4
+			addi r4, r4, -8
+			addi r6, r6, -2
+			add r2, r2, r4
+			add r2, r2, r6			#if r2 =0 then all tiles are ok to proceed to move
+			beq r2, r0, deselect	#else goto deselect
+			
+			addi r2, r0, 1
+			addi r4, r0, 5
+			addi r6, r0, 1			#set new tile values
+			
+			sw r2, r1, 0
+			sw r4, r3, 0
+			sw r6, r5, 0			#store to board
+			
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			
+			add r3, r3 ,r3
+			add r3, r3 ,r3
+			add r3, r3 ,r3
+			add r3, r3 ,r3
+			
+			add r5, r5, r5
+			add r5, r5, r5
+			add r5, r5, r5
+			add r5, r5, r5
+			
+			add r2, r1, r2
+			add r4, r3, r4
+			add r6, r5, r6
+			
+			lui r7, 0x40		#set r7 to 64 (DataMem Offset)
+			sw r2, r7, 0
+			sw r4, r7, 0
+			sw r6, r7, 0		#send to fb
+			
+			sw r0, r7, 21		#reset variable Selected
+			
+			movi r6, intend
+			jalr r0, r6
+			
+			
+####	deselect:	nand r5, r1, r1		#invert cursor and store to r5
+####			nand r5, r5, r3		#nand cursor and selected
+####			nand r5, r5, r5		# now if cursor = selected then r5 = 0
+####			beq r5, r0, mkmove	#!!!CAUTION may label should change
+
+			
+	deselect:	lw r4, r3, 0		#bring selected tile
+			addi r4, r4, -6		#deselect the tile
+			sw r4, r3, 0		#store deselected tile to board
+			add r3,r3,r3
+			add r3,r3,r3
+			add r3,r3,r3
+			add r3,r3,r3
+			addi r4, r3, r4		#coding for framebuffer
+			lui r7, 0x40		#set r7 to 64 (DataMem Offset) Just to be sure
+			sw r4, r7, 0		#send new tile to fb
+			sw r0, r7, 21		#reset the variable selected
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
+			
+			
 
 intend:		lui r7, 0x40		#set r7 to 64 (DataMem Offset) # closing interrupt Handler
 			lw r1, r7, 3		#load normal flow registers to DataMem at 64(r7) + offset (3)
