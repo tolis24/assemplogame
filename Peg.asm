@@ -444,13 +444,6 @@ slcthandler: addi r5, r0, 16  		#Reset slctflag
 			movi r6, intend
 			jalr r0, r6
 			
-			
-####	deselect:	nand r5, r1, r1		#invert cursor and store to r5
-####			nand r5, r5, r3		#nand cursor and selected
-####			nand r5, r5, r5		# now if cursor = selected then r5 = 0
-####			beq r5, r0, mkmove	#!!!CAUTION may label should change
-
-			
 	deselect:	lw r3, r7, 21	#bring selected
 			lw r4, r3, 0		#bring selected tile
 			addi r4, r4, -6		#deselect the tile
@@ -459,7 +452,7 @@ slcthandler: addi r5, r0, 16  		#Reset slctflag
 			add r3,r3,r3
 			add r3,r3,r3
 			add r3,r3,r3
-			addi r4, r3, r4		#coding for framebuffer
+			add r4, r3, r4		#coding for framebuffer
 			lui r7, 0x40		#set r7 to 64 (DataMem Offset) Just to be sure
 			sw r4, r7, 0		#send new tile to fb
 			sw r0, r7, 21		#reset the variable selected
