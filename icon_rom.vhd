@@ -4,14 +4,17 @@ use IEEE.std_logic_arith.all;
 
 entity icon_rom is
 port (countV : in std_logic_vector(9 downto 0);
+		countH : in std_logic_vector(9 downto 0);
 		pointer : in std_logic_vector(3 downto 0);
-		dataOut : out std_logic_vector(79 downto 0));
+		bitstream : out std_logic);
 end icon_rom;
 
 architecture RTL of icon_rom is
 
 signal row : std_logic_vector(9 downto 0);
+signal column : std_logic_vector(9 downto 0);
 signal address : std_logic_vector(9 downto 0);
+signal dataOut : std_logic_vector(79 downto 0);
 
 begin
 
@@ -37,6 +40,31 @@ begin
 		row <= (others => '0');
 	end if;
 end process;
+
+process (countH)
+begin 
+	if unsigned(countH) < 80 then 
+		column <= countH;
+	elsif unsigned(countH) < 160 then
+		column <= unsigned(countH) - 80;
+	elsif unsigned(countH) < 240 then
+		column <= unsigned(countH) - 160;
+	elsif unsigned(countH) < 320 then
+		column <= unsigned(countH) - 240;
+	elsif unsigned(countH) < 400 then
+		column <= unsigned(countH) - 320;
+	elsif unsigned(countH) < 480 then
+		column <= unsigned(countH) - 400;
+	elsif unsigned(countH) < 560 then
+		column <= unsigned(countH) - 480;
+	elsif unsigned(countH) < 640 then
+		column <= unsigned(countH) - 560;
+	else
+		column <= (others => '0');
+	end if;
+end process;
+
+bitstream <= dataOut(conv_integer(unsigned(column)));
 
 		
 address(9 downto 6) <= pointer;

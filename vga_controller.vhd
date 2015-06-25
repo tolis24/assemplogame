@@ -13,7 +13,7 @@ port (clk : in std_logic;
 		hsync : out std_logic;
 		vsync : out std_logic;
 		
-		dataIn : in std_logic_vector(79 downto 0);
+		bitstream : in std_logic;
 		cntV : out std_logic_vector(9 downto 0);
 		cntH : out std_logic_vector(9 downto 0)
 		);
@@ -23,7 +23,7 @@ architecture vga of vga_controller is
 	
 signal Pixelclk : std_logic;
 signal countH, countV: std_logic_vector(9 downto 0);
-signal char_line: std_logic_vector(79 downto 0);
+signal char_line: std_logic;
 signal column : std_logic_vector(9 downto 0);
 
 begin
@@ -78,34 +78,11 @@ process(clk, rst)
 set_buffer: process(clk, rst)
 		begin
 			if rising_edge(clk) then --buffer to cut long path of countV
-				char_line <= dataIn;					
+				char_line <= bitstream;					
 			end if;
 end process;
 
---char_line <= dataIn;
-
-process (countH)
-begin 
-	if unsigned(countH) < 80 then 
-		column <= countH;
-	elsif unsigned(countH) < 160 then
-		column <= unsigned(countH) - 80;
-	elsif unsigned(countH) < 240 then
-		column <= unsigned(countH) - 160;
-	elsif unsigned(countH) < 320 then
-		column <= unsigned(countH) - 240;
-	elsif unsigned(countH) < 400 then
-		column <= unsigned(countH) - 320;
-	elsif unsigned(countH) < 480 then
-		column <= unsigned(countH) - 400;
-	elsif unsigned(countH) < 560 then
-		column <= unsigned(countH) - 480;
-	elsif unsigned(countH) < 640 then
-		column <= unsigned(countH) - 560;
-	else
-		column <= (others => '0');
-	end if;
-end process;
+--char_line <= bitstream;
  
  setColors: process(countH, countV, char_line, column)
 		begin
@@ -115,7 +92,7 @@ end process;
 				case conv_integer(unsigned(countV)) is
 					when 0 to 480 =>
 					
-						if char_line(conv_integer(unsigned(column))) = '1' then 
+						if char_line = '1' then 
 							rout <= (others => '1');
 							gout <= (others => '1');
 							bout <= (others => '1');

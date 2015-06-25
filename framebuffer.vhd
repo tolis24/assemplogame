@@ -13,8 +13,8 @@ entity framebuffer is port(
 															-- (6 downto 4) column number (Y) 3bits
 															-- (3 downto 0) value to store (V) 4bits
 	  
-      countH  : in  std_logic_vector(9 downto 0);
       countV  : in  std_logic_vector(9 downto 0);
+      countH  : in  std_logic_vector(9 downto 0);
 	  
       dataOut : out std_logic_vector(3 downto 0));
 end framebuffer;

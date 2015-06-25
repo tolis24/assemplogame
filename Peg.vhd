@@ -95,31 +95,32 @@ architecture game of Peg is
 																	-- (8 downto 4) column number (Y)
 																	-- (3 downto 0) value to store (V)
 	  
-				countH  : in  std_logic_vector(9 downto 0);
 				countV  : in  std_logic_vector(9 downto 0);
-	  
+				countH  : in  std_logic_vector(9 downto 0);
+				
 				dataOut : out std_logic_vector(3 downto 0));
 	end component framebuffer;
 	
 	component icon_rom is
-		port (	countV : in std_logic_vector(9 downto 0);
-				pointer : in std_logic_vector(3 downto 0);
-				dataOut : out std_logic_vector(79 downto 0));
-	end component icon_rom;
+		port (countV : in std_logic_vector(9 downto 0);
+			countH : in std_logic_vector(9 downto 0);
+			pointer : in std_logic_vector(3 downto 0);
+			bitstream : out std_logic);
+end component icon_rom;
 	
 	component vga_controller is
-		port (	clk : in std_logic;
-				rst : in std_logic;
-
-				rout, gout, bout : out std_logic_vector(3 downto 0);
-				hsync : out std_logic;
-				vsync : out std_logic;
+		port (clk : in std_logic;
+			rst : in std_logic;
+			--rin, gin, bin : in std_logic_vector(3 downto 0);
+			rout, gout, bout : out std_logic_vector(3 downto 0);
+			hsync : out std_logic;
+			vsync : out std_logic;
 		
-				dataIn : in std_logic_vector(79 downto 0);
-				cntV : out std_logic_vector(9 downto 0);
-				cntH : out std_logic_vector(9 downto 0)
+			bitstream : in std_logic;
+			cntV : out std_logic_vector(9 downto 0);
+			cntH : out std_logic_vector(9 downto 0)
 		);
-	end component vga_controller;
+end component vga_controller;
 	
 
 	signal ground : std_logic_vector(15 downto 0);
@@ -144,8 +145,8 @@ architecture game of Peg is
 	signal fbWen : std_logic;
 	signal pointer : std_logic_vector(3 downto 0);
 	
-	signal countH, countV : std_logic_vector(9 downto 0);
-	signal vgadata : std_logic_vector(79 downto 0);
+	signal countV, countH : std_logic_vector(9 downto 0);
+	signal bitstream : std_logic;
 	
 	
 begin
@@ -162,11 +163,11 @@ begin
 	
 	Int_ctrl: interrupt_controller port map (clk, rst, intOut, intWen, up, down, lft, rght, slct, intflag, intIn, wintEn, intEn);
 	
-	FB: framebuffer port map (clk, rst, fbWen, fbOut, countH, countV, pointer);
+	FB: framebuffer port map (clk, rst, fbWen, fbOut, countV, countH, pointer);
 	
-	icons: icon_rom port map (countV, pointer, vgadata);
+	icons: icon_rom port map (countV,countH, pointer, bitstream);
 	
-	vga_ctrl: vga_controller port map (clk, rst, rout, bout, gout, hsync, vsync, vgadata, countV, countH);
+	vga_ctrl: vga_controller port map (clk, rst, rout, bout, gout, hsync, vsync, bitstream, countV, countH);
 	
 	
 end game;
