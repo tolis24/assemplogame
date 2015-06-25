@@ -139,7 +139,6 @@ infinite:	beq       0,3,infinite
 			sw r6, r7, 8
 			sw r7, r7, 9
 			
-<<<<<<< HEAD
 			lw r1, r7,1			#load intVector to r1
 			
 			addi r2, r0, 1		#set r2 mask for up "00...01"
@@ -194,14 +193,19 @@ gotoslct:	movi r3, slcthandler
 slcthop:	movi r3 , intend	#if reach this point no interrupt is handled so goto in ending
 			jalr r0, r3
 			
-uphandler:	lw 		r1, r7, 20		#Get cursor address
-			addi	r3, r1, -8		#Get address above cursor !!caution Add mask after substruction
-#			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
-#			nand	r3, r3, r4
-#			nand	r3, r3, r3
+uphandler:	addi r3, r0, 1  		#Reset upflag
+			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
+			addi	r3, r1, -8		#Create address above cursor
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
 			
 			lw		r2, r1, 0		#Get value(tile) of cursor
 			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
 			add 	r1, r1, r1
 			add 	r1, r1, r1
 			add 	r1, r1, r1
@@ -211,6 +215,7 @@ uphandler:	lw 		r1, r7, 20		#Get cursor address
 			
 			lw		r2, r3, 0		#Get value of new cursor
 			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
 			add 	r3, r3, r3
 			add 	r3, r3, r3
 			add 	r3, r3, r3
@@ -218,19 +223,244 @@ uphandler:	lw 		r1, r7, 20		#Get cursor address
 			add		r2, r3, r2
 			sw		r2, r7, 0  		#sent tofb cursored icon
 			
-			movi r3, 97  		#Enable SWint and rst upflag
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
+
+downhandler:	addi r3, r0, 2  		#Reset downflag
 			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
+			addi	r3, r1, 8		#Create address below cursor
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
+			
+			lw		r2, r1, 0		#Get value(tile) of cursor
+			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1		#r1(cursor address) << 4
+			add		r2, r1, r2
+			sw		r2, r7, 0  		#Update cursors tile
+			
+			lw		r2, r3, 0		#Get value of new cursor
+			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3		# r3 << 4
+			add		r2, r3, r2
+			sw		r2, r7, 0  		#sent tofb cursored icon
 			
 			movi r3, intend
 			jalr r0, r3			#jumps to intend
 
-downhandler: nop
+lfthandler:	addi r3, r0, 4  		#Reset lftflag
+			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
+			addi	r3, r1, -1		#Create address above cursor
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
+			
+			lw		r2, r1, 0		#Get value(tile) of cursor
+			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1		#r1(cursor address) << 4
+			add		r2, r1, r2
+			sw		r2, r7, 0  		#Update cursors tile
+			
+			lw		r2, r3, 0		#Get value of new cursor
+			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3		# r3 << 4
+			add		r2, r3, r2
+			sw		r2, r7, 0  		#sent tofb cursored icon
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
 
-lfthandler:	nop
+rghthandler: addi r3, r0, 8  		#Reset rghtflag
+			sw r3, r7, 1
+			
+			lw 		r1, r7, 20		#Get cursor address
+			addi	r3, r1, 1		#Create address above cursor
+			addi	r4, r0, 63		#Set mask for new address "00...0111111" (keep last 6bits)
+			nand	r3, r3, r4
+			nand	r3, r3, r3
+			sw		r3, r7, 20		#Store at cursor variable the new cursor address
+			
+			lw		r2, r1, 0		#Get value(tile) of cursor
+			addi	r2, r2, -3		#uncursor it
+			sw 		r2, r1, 0		#Change the value of current tile at board
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1
+			add 	r1, r1, r1		#r1(cursor address) << 4
+			add		r2, r1, r2
+			sw		r2, r7, 0  		#Update cursors tile
+			
+			lw		r2, r3, 0		#Get value of new cursor
+			addi	r2, r2, 3		#cursor the value
+			sw		r2, r3,	0		#store at board new cursor value
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3
+			add 	r3, r3, r3		# r3 << 4
+			add		r2, r3, r2
+			sw		r2, r7, 0  		#sent tofb cursored icon
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
 
-rghthandler: nop
-
-slcthandler: nop
+slcthandler: addi r5, r0, 16  		#Reset slctflag
+			sw r3, r7, 1
+			
+			lui r7, 0x40		#set r7 to 64 (DataMem Offset) Just to be sure
+			lw r1, r7, 20 		#load cursor to r1
+			lw r2, r1, 0		#load Tile at cursor to r2
+			
+			lw r3, r7, 21		#load selected to r3
+			lw r4, r3, 0		#load the selected tile to r4
+			
+			beq r3, r0, mkmove		#if none selected
+			addi r5, r2, -5			#
+			
+			beq r5, r0, whintent	#and Cursor tile =5 (filled with cursor)   	!!!CAUTION beq out of range so use of wormhole
+			movi r5, whintenhop
+			jalr r0, r5
+	whintent: movi r5, intend
+			jalr r0, r5
+			
+	whintenhop:	addi r2, r2, 6			#change cursor tile to 11 (filled with cursor and selected)
+			sw r1, r7, 21			#set selected <- cursor
+			sw r2, r1, 0			#save new tile at board
+			
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			
+			add r2, r1, r2			#coding for framebuffer
+			sw r2, r7, 0			#send new tile to fb
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
+			
+	mkmove: nand r5, r1, r1
+			addi r5, r5, 1		#r5 now equals -cursor
+			add r5, r5, r3		#so r5 is now selected-cursor
+	
+#(updir)	
+			addi r6, r5, -16	
+			beq r6, r0, downdir	#if cursor above select and at the correct place goto updir
+			
+			addi r5, r3, -8	#r5 has the address of Middle Tile (or direction)
+			
+			movi r6, endofdir
+			jalr r0, r6
+				
+	downdir:	addi r6, r5, 16
+			beq r6, r0, lftdir	#if cursor below select and at the correct place set Middle tile address
+			
+			addi r5, r3, 8
+			
+			movi r6, endofdir
+			jalr r0, r6
+			
+	lftdir:		addi r6, r5, -2
+			beq r6, r0, rghtdir	#if cursor left of select and at the correct place set Middle tile address
+			
+			addi r5, r3, -1
+			
+			movi r6, endofdir
+			jalr r0, r6
+			
+	rghtdir:	addi r6, r5, 2
+			beq r6, r0, whtodeslct	#if cursor right of select and at the correct place set Middle tile address
+			
+			addi r5, r3, 1
+			
+			movi r6, endofdir
+			jalr r0, r6
+			
+	whtodeslct:	movi r6, deselect
+				jalr r0, r6
+			
+		endofdir:	lw r6, r5, 0	# now we have r1=Cursor r2=Ctile r3=Selected r4=Stile r5=Middle r6=Mtile
+			addi r2, r2, -4			#to check if tile = 4
+			addi r4, r4, -8
+			addi r6, r6, -2
+			beq r2, r0, deselect
+			beq r4, r0, deselect			#if r2, r4 and r6 =0 then all tiles are ok to proceed to move
+			beq r6, r0, deselect			#else goto deselect
+			
+			addi r2, r0, 5
+			addi r4, r0, 1
+			addi r6, r0, 1			#set new tile values
+			
+			sw r2, r1, 0
+			sw r4, r3, 0
+			sw r6, r5, 0			#store to board
+			
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			add r1, r1, r1
+			
+			add r3, r3 ,r3
+			add r3, r3 ,r3
+			add r3, r3 ,r3
+			add r3, r3 ,r3
+			
+			add r5, r5, r5
+			add r5, r5, r5
+			add r5, r5, r5
+			add r5, r5, r5
+			
+			add r2, r1, r2
+			add r4, r3, r4
+			add r6, r5, r6
+			
+			lui r7, 0x40		#set r7 to 64 (DataMem Offset)
+			sw r2, r7, 0
+			sw r4, r7, 0
+			sw r6, r7, 0		#send to fb
+			
+			sw r0, r7, 21		#reset variable Selected
+			
+			movi r6, intend
+			jalr r0, r6
+			
+	deselect:	lw r3, r7, 21	#bring selected
+			lw r4, r3, 0		#bring selected tile
+			addi r4, r4, -6		#deselect the tile
+			sw r4, r3, 0		#store deselected tile to board
+			add r3,r3,r3
+			add r3,r3,r3
+			add r3,r3,r3
+			add r3,r3,r3
+			add r4, r3, r4		#coding for framebuffer
+			lui r7, 0x40		#set r7 to 64 (DataMem Offset) Just to be sure
+			sw r4, r7, 0		#send new tile to fb
+			sw r0, r7, 21		#reset the variable selected
+			
+			movi r3, intend
+			jalr r0, r3			#jumps to intend
+			
+			
 
 intend:		lui r7, 0x40		#set r7 to 64 (DataMem Offset) # closing interrupt Handler
 			lw r1, r7, 3		#load normal flow registers to DataMem at 64(r7) + offset (3)
@@ -244,29 +474,4 @@ intend:		lui r7, 0x40		#set r7 to 64 (DataMem Offset) # closing interrupt Handle
 			jalr r0, r7			#Wheeee back to the normal flow
 			
 
-=======
-			# loupa ateleiwti
-			addi 	3,0,3
-infinite:			beq       0,3,infinite
-
-			#uphandler
-uphandler:		lw 	1,7,20	#cursor address
-			addi	3,1,-8	#upped cursor address
-			lw	2,1,0	#value now
-			addi	2,2,-3
-			add 	1,1,1
-			add 	1,1,1
-			add 	1,1,1
-			add 	1,1,1
-			add	2,1,2
-			sw	2,7,0  	#sent tofb uncursored icon
-			lw	2,3,0	#value upped cursor
-			addi	2,2,3
-			add 	3,3,3
-			add 	3,3,3
-			add 	3,3,3
-			add 	3,3,3
-			add	2,3,2
-			sw	2,7,0  	#sent tofb cursored icon
->>>>>>> origin/assembly
 			

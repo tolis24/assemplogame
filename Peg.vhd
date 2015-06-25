@@ -47,7 +47,7 @@ architecture game of Peg is
 		port (	clk 	: in std_logic;			-- clock
 				rst 	: in std_logic;			-- reset
 				
-				rstVector	: in std_logic_vector(4 downto 0); -- Vector to rst interrupts
+				rstVector	: in std_logic_vector(15 downto 0); -- Vector to rst interrupts
 				Wen			: in std_logic;
 			
 				up		:	in std_logic;		-- button inputs
@@ -57,7 +57,9 @@ architecture game of Peg is
 				slct	:	in std_logic;
 			
 				intflag : out std_logic;						-- interrupt flag for processor
-				intVector : out std_logic_vector(15 downto 0)	-- 0 up, 1 down, 2 left, 3 right, 4 select , others Don't care 0
+				intVector : out std_logic_vector(15 downto 0);	-- 0 up, 1 down, 2 left, 3 right, 4 select , others Don't care 0
+				wintEn	: out std_logic;						-- enable to write at interrupt software enable
+				intEn	: out std_logic						--value to write at interrupt software enable
 		);
 		
 	end component interrupt_controller;
@@ -134,6 +136,9 @@ architecture game of Peg is
 	signal intWen : std_logic;								-- Allow to write to procwssors intEn
 	signal intflag : std_logic;
 	
+	signal wintEn : std_logic;
+	signal intEn : std_logic;
+	
 		
 	signal fbOut : std_logic_vector(15 downto 0); -- lines to Frame Buffer
 	signal fbWen : std_logic;
@@ -147,7 +152,7 @@ begin
 
 	ground <= (others => '0');
 
-	proc: processor port map (clk, rst, iaddr, idata, procAddr, procWen, procIn, procOut, intWen, intOut(5), intflag);
+	proc: processor port map (clk, rst, iaddr, idata, procAddr, procWen, procIn, procOut, wintEn, intEn, intflag);
 	
 	Mem_ctrl: mem_controller port map (procWen, procAddr, procIn, procOut, dmWen, dmAddr, dmIn, dmOut, fbWen, fbOut, intWen, intOut, intIn);
 	
@@ -155,7 +160,7 @@ begin
 	
 	DataMem: ram_infer port map (clk, rst, dmOut, dmAddr, dmAddr, dmWen, dmIn);
 	
-	Int_ctrl: interrupt_controller port map (clk, rst, intOut(4 downto 0), intWen, up, down, lft, rght, slct, intflag, intIn);
+	Int_ctrl: interrupt_controller port map (clk, rst, intOut, intWen, up, down, lft, rght, slct, intflag, intIn, wintEn, intEn);
 	
 	FB: framebuffer port map (clk, rst, fbWen, fbOut, countH, countV, pointer);
 	

@@ -207,10 +207,10 @@ begin
 							dout 	<= reg(conv_integer(unsigned(ir(12 downto 10))));
 							dwen 	<= '1'; -- write in the same cycle
 							
-						-- lw : R[regA] <= RegFile(R[regB] + immed) 
-						elsif ir(15 downto 13) = "101" then
+						-- lw, bne
+						elsif ir(15 downto 13) = "101" or ir(15 downto 13) = "110" then
 							-- Just wait for this cycle
-							--reg(conv_integer(unsigned(ir(12 downto 10)))) <= din;
+							--Do nothing
 						
 						-- add, addi, nand, lui, jalr: R[regA] <= ALUOut
 						else
